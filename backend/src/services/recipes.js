@@ -21,6 +21,28 @@ async function listRecipes(
   query = {},
   { sortBy = "createdAt", sortOrder = "descending" } = {},
 ) {
+  if (sortBy === "likeCount") {
+    return await Recipe.aggregate([
+      { $match: query },
+      {
+        $lookup: {
+          from: "likes", // your likes collection
+          localField: "_id",
+          foreignField: "recipeId",
+          as: "likes",
+        },
+      },
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" },
+        },
+      },
+      {
+        $sort: { likesCount: sortOrder === "descending" ? -1 : 1 },
+      },
+    ]);
+  }
+
   return await Recipe.find(query).sort({ [sortBy]: sortOrder });
 }
 
