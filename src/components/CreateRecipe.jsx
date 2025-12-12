@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext.jsx";
 import { createRecipe } from "../api/recipes.js";
+import { useChat } from "../hooks/useChat.js";
 
 export function CreateRecipe() {
   const [title, setTitle] = useState("");
@@ -10,6 +11,8 @@ export function CreateRecipe() {
   const [image, setImage] = useState("");
   const [tags, setTags] = useState("");
   const queryClient = useQueryClient();
+  const { sendMessage } = useChat();
+
   const createRecipeMutation = useMutation({
     mutationFn: () =>
       createRecipe(token, {
@@ -18,7 +21,14 @@ export function CreateRecipe() {
         image,
         tags: tags.split(",").map((t) => t.trim()),
       }),
-    onSuccess: () => queryClient.invalidateQueries(["recipes"]),
+    onSuccess: (recipe) => {
+      queryClient.invalidateQueries(["recipes"]),
+        sendMessage({
+          message: `New recipe created: ${recipe.title}`,
+          link: `/recipes/${recipe._id}`,
+          username: "System",
+        });
+    },
   });
   const handleSubmit = (e) => {
     e.preventDefault();

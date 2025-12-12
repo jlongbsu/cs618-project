@@ -3,6 +3,9 @@ import { CreateRecipe } from "../components/CreateRecipe.jsx";
 import { RecipeFilter } from "../components/RecipeFilter.jsx";
 import { RecipeSorting } from "../components/RecipeSorting.jsx";
 import { Header } from "../components/Header.jsx";
+import { Status } from "../components/Status.jsx";
+import { ChatRoom } from "../components/ChatRoom.jsx";
+import { useSocket } from "../contexts/SocketIOContext.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { getRecipes } from "../api/recipes.js";
 import { useState } from "react";
@@ -44,10 +47,19 @@ export function RecipeSharer() {
     queryFn: () => getRecipes({ author, sortBy, sortOrder }),
   });
   const recipes = recipesQuery.data ?? [];
+  const { status } = useSocket();
 
   return (
     <div style={{ padding: 8 }}>
       <Header />
+      <br />
+      <hr />
+      <br />
+      <Status />
+      <br />
+      <hr />
+      <br />
+      {status === "connected" && <ChatRoom />}
       <br />
       <hr />
       <CreateRecipe />
